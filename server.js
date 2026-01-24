@@ -49,6 +49,61 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Please enter email and password.' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password.' });
+        }
+
+        if (user.password !== password) {
+            return res.status(401).json({ error: 'Invalid email or password.' });
+        }
+
+        req.session.userId = user._id;
+
+        return res.json({
+            message: 'Login successful',
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Server error during login.' });
+    }
+});
+
+app.get('/api/me', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not logged in' });
+    }
+
+    return res.json({
+        message: 'User is logged in',
+        userId: req.session.userId
+    });
+});
+
+
+app.post('/api/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Logout failed.' });
+        }
+        return res.json({ message: 'Logout successful' });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
