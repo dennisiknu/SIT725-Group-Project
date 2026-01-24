@@ -1,0 +1,23 @@
+{
+  "name": "sit725-group-project",
+  "version": "1.0.0",
+  "description": "Task and Productivity Management App",
+  "homepage": "https://github.com/dennisiknu/SIT725-Group-Project#readme",
+  "bugs": {
+    "url": "https://github.com/dennisiknu/SIT725-Group-Project/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dennisiknu/SIT725-Group-Project.git"
+  },
+  "license": "ISC",
+  "author": "Dennis, Meet and Zitian",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
