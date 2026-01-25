@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const Task = require('./models/Task');
 const User = require('./models/User');
 
 const app = express();
@@ -21,6 +22,53 @@ app.use(session({
 }));
 
 app.use(express.json());
+
+// API end point start
+app.post('/api/tasks', async (req, res) => {
+  try {
+    const { title, category, priority, dueDate } = req.body;
+
+    const errors = [];
+
+    if (!title || typeof title !== 'string' || title.trim().length < 3) {
+        errors.push('Title is required and must be at least 3 characters.');
+    }
+
+    if (category !== undefined && typeof category !== 'string') {
+        errors.push('Category must be a string.');
+    }
+
+    const allowedPriorities = ['Low', 'Medium', 'High'];
+    if (priority !== undefined && !allowedPriorities.includes(priority)) {
+        errors.push('Priority must be between Low, Medium, High.');
+    }
+
+    let parsedDueDate;
+    if (dueDate !== undefined && dueDate !== null && dueDate !== '') {
+        parsedDueDate = new Date(dueDate);
+        if (Number.isNaN(parsedDueDate.getTime())) {
+            errors.push('Due date must be a valid date.');
+        }
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({ message: 'Validation failed', errors });
+    }
+
+
+    const task = await Task.create({
+        title: title.trim(),
+        category: category?.trim() || 'General',
+        priority: priority || 'Medium',
+        dueDate: parsedDueDate
+    });
+
+    return res.status(201).json({ message: 'Task created', task });
+  } catch (err) {
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+// API endpoint Finish
 
 app.use(express.static(path.join(__dirname, 'public')));
 
