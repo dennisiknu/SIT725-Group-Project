@@ -8,6 +8,10 @@ const User = require('./models/User');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// .use
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true })); 
+
 const MONGO_URI = 'mongodb://127.0.0.1:27017/sit725_project';
 
 mongoose
@@ -70,7 +74,7 @@ app.post('/api/tasks', async (req, res) => {
 });
 // API endpoint Finish
 
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.post('/api/register', async (req, res) => {
     try {
