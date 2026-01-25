@@ -9,7 +9,7 @@ form.addEventListener('submit', async (e) => {
   const title = document.getElementById('title').value.trim();
   const category = document.getElementById('category').value.trim();
   const priority = document.getElementById('priority').value;
-  const dueDate = document.getElementById('dueDate').value; // year month date
+  const dueDate = document.getElementById('dueDate').value;
 
   try {
     const res = await fetch('/api/tasks', {
@@ -36,16 +36,11 @@ form.addEventListener('submit', async (e) => {
     }
 
     msg.style.color = 'green';
-    msg.textContent = 'Task created successfully ';
+    msg.textContent = 'Task created successfully';
     form.reset();
-
-    // it's optional- we can remove that but it will auto redirect after 1 sec to tasks
-/*    setTimeout(() => {
-      window.location.href = '/tasks.html';
-    }, 800); */
 
   } catch (err) {
     msg.style.color = 'red';
-    msg.textContent = 'Network or server error. Please try again.';
+    msg.textContent = 'Error. Please try again.';
   }
 });

@@ -74,6 +74,16 @@ app.post('/api/tasks', async (req, res) => {
 });
 // API endpoint Finish
 
+// API data fetch
+app.get('/api/tasks', async (req, res) => {
+  try {
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    return res.status(200).json(tasks);
+  } catch (err) {
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+// API data fetch end
 
 
 app.post('/api/register', async (req, res) => {
