@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const mongoose = require('mongoose');
-const Task = require('./models/Task');
 const User = require('./models/User');
 
 const app = express();
