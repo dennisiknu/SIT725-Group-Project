@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Task</title>
+</head>
+<body>
+  <h1>Create Task</h1>
+
+  <p id="msg"></p>
+
+  <form id="taskForm">
+    <div>
+      <label>Title *</label><br />
+      <input type="text" id="title" required minlength="3" />
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>Category</label><br />
+      <input type="text" id="category" placeholder="General" />
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>Priority</label><br />
+      <select id="priority">
+        <option value="Low">Low</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>Due Date</label><br />
+      <input type="date" id="dueDate" />
+    </div>
+
+    <div style="margin-top:15px;">
+      <button type="submit">Create</button>
+      <a href="/tasks.html" style="margin-left:10px;">Go to Tasks</a>
+    </div>
+  </form>
+
+  <script src="/js/createtask.js"></script>
+</body>
+</html>
