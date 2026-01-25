@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const Task = require('./models/Task');
 const User = require('./models/User');
 
 const app = express();
@@ -21,6 +22,30 @@ app.use(session({
 }));
 
 app.use(express.json());
+
+// API end point start
+app.post('/api/tasks', async (req, res) => {
+  try {
+    const { title, category, priority, dueDate } = req.body;
+
+    // basic validation 
+    if (!title || title.trim() === '') {
+      return res.status(400).json({ message: 'Title is required' });
+    }
+
+    const task = await Task.create({
+      title: title.trim(),
+      category,
+      priority,
+      dueDate
+    });
+
+    return res.status(201).json({ message: 'Task created', task });
+  } catch (err) {
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+// API endpoint Finish
 
 app.use(express.static(path.join(__dirname, 'public')));
 
