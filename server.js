@@ -74,6 +74,46 @@ app.post('/api/tasks', async (req, res) => {
 });
 // API endpoint Finish
 
+// API ENd point edit delete
+
+app.put('/api/tasks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, category, priority, dueDate, status } = req.body;
+
+    const update = {};
+    if (title !== undefined) update.title = String(title).trim();
+    if (category !== undefined) update.category = String(category).trim();
+    if (priority !== undefined) update.priority = priority;
+    if (status !== undefined) update.status = status;
+
+    if (dueDate === '' || dueDate === null) update.dueDate = undefined;
+    else if (dueDate !== undefined) update.dueDate = new Date(dueDate);
+
+    const updated = await Task.findByIdAndUpdate(id, update, { new: true });
+
+    if (!updated) return res.status(404).json({ message: 'Task not found' });
+
+    res.json({ message: 'Task updated', task: updated });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Task.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'Task not found' });
+
+    res.json({ message: 'Task deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+// end api delte edit
+
 // API data fetch
 app.get('/api/tasks', async (req, res) => {
   try {
