@@ -14,6 +14,14 @@ app.use(cors()); // Allow cross-origin requests (for frontend integration)
 app.use(bodyParser.json()); // Parse JSON request bodies
 app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 
+
+
+app.use(express.static('public')); 
+
+
+app.get('/', (req, res) => {
+  res.redirect('/tasks.html');
+});
 // --------------- SQLite Database Configuration ---------------
 // Connect to SQLite database (creates task_database.db if it doesn't exist)
 const db = new sqlite3.Database('./task_database.db', (err) => {
@@ -222,11 +230,39 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('API Docs (original FastAPI) style: Use Postman/Thunder Client to test endpoints');
 });
 
-/*
-  Run the app steps:
-  1. Initialize npm project: npm init -y
-  2. Install dependencies: npm install express sqlite3 cors body-parser date-fns
-  3. Save this code as main.js
-  4. Run: node main.js
-  5. Test endpoints: http://localhost:8000/api/tasks (same as FastAPI version)
-*/
+
+
+app.get('/api/tasks/filter', (req, res) => {
+  const {
+    status = null,
+    priority = null,
+    sort_by = 'created_at',
+    sort_order = 'desc'
+  } = req.query;
+
+  
+  const validSortColumns = ['id', 'title', 'status', 'progress', 'priority', 'due_date', 'created_at'];
+  const sortColumn = validSortColumns.includes(sort_by) ? sort_by : 'created_at';
+  const sortOrder = sort_order.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+  let query = 'SELECT * FROM tasks WHERE 1=1';
+  const params = [];
+
+  if (status) {
+    query += ' AND status = ?';
+    params.push(status);
+  }
+  if (priority) {
+    query += ' AND priority = ?';
+    params.push(priority);
+  }
+
+  query += ` ORDER BY ${sortColumn} ${sortOrder}`;
+
+  db.all(query, params, (err, tasks) => {
+    if (err) {
+      return res.status(500).json({ detail: 'Failed to fetch tasks: ' + err.message });
+    }
+    res.status(200).json(tasks);
+  });
+});

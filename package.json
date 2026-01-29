@@ -18,9 +18,14 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "date-fns": "^4.1.0",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "mongoose": "^9.1.5",
-    "nodemon": "^3.1.11"
-  }
+    "nodemon": "^3.1.11",
+    "sqlite3": "^5.1.7"
+  },
+  "keywords": []
 }

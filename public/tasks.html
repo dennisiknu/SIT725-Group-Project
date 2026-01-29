@@ -1,22 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tasks</title>
+  <meta charset="UTF-8">
+  <title>Task Manager - Filter & Sort</title>
+  <style>
+    .filter-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .task-card {
+      margin: 10px 0;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status-select {
+      padding: 4px;
+      margin-left: 8px;
+    }
+    #errorMsg { color: #dc3545; }
+    #successMsg { color: #28a745; }
+    button {
+      padding: 4px 8px;
+      margin-left: 8px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <h1>All Tasks</h1>
+  <h1>Task Manager</h1>
+  
+  
+  <div class="filter-section">
+    <h3>Filter & Sort Tasks</h3>
+    <div>
+      <label>Status:</label>
+      <select id="statusFilter">
+        <option value="">All</option>
+        <option value="To Do">To Do</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Completed">Completed</option>
+      </select>
 
-  <div style="margin-bottom: 10px;">
-    <a href="/index.html"><button>Home</button></a>
-    <a href="/createtask.html" style="margin-left: 8px;"><button>Create Task</button></a>
+      <label style="margin-left: 10px;">Priority:</label>
+      <select id="priorityFilter">
+        <option value="">All</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+
+      <label style="margin-left: 10px;">Sort By:</label>
+      <select id="sortBy">
+        <option value="created_at">Created Date</option>
+        <option value="due_date">Due Date</option>
+        <option value="priority">Priority</option>
+        <option value="progress">Progress</option>
+      </select>
+
+      <label style="margin-left: 10px;">Order:</label>
+      <select id="sortOrder">
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+      </select>
+    </div>
   </div>
 
-  <p id="msg"></p>
+  
+  <div id="errorMsg"></div>
+  <div id="successMsg"></div>
 
-  <ul id="taskList"></ul>
 
-  <script src="/js/tasks.js"></script>
+  <div id="tasksContainer"></div>
+
+ 
+  <script src="js/tasks.js"></script>
 </body>
 </html>
