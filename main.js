@@ -232,15 +232,18 @@ app.listen(PORT, '0.0.0.0', () => {
 
 
 
+// Extend GET /api/tasks/filter endpoint in main.js to add date filter logic
 app.get('/api/tasks/filter', (req, res) => {
   const {
     status = null,
     priority = null,
     sort_by = 'created_at',
-    sort_order = 'desc'
+    sort_order = 'desc',
+    // New: Receive date filter type from frontend (overdue/upcoming)
+    date_filter = null 
   } = req.query;
 
-  
+  // Validate sort column (prevent SQL injection, only allow valid columns)
   const validSortColumns = ['id', 'title', 'status', 'progress', 'priority', 'due_date', 'created_at'];
   const sortColumn = validSortColumns.includes(sort_by) ? sort_by : 'created_at';
   const sortOrder = sort_order.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
@@ -248,17 +251,38 @@ app.get('/api/tasks/filter', (req, res) => {
   let query = 'SELECT * FROM tasks WHERE 1=1';
   const params = [];
 
-  if (status) {
-    query += ' AND status = ?';
-    params.push(status);
+  // Apply status filter if provided
+  if (status) { 
+    query += ' AND status = ?'; 
+    params.push(status); 
   }
-  if (priority) {
-    query += ' AND priority = ?';
-    params.push(priority);
+  // Apply priority filter if provided
+  if (priority) { 
+    query += ' AND priority = ?'; 
+    params.push(priority); 
   }
 
+  // New: Date filter logic (overdue/upcoming)
+  if (date_filter) {
+    const today = new Date().toISOString().split('T')[0]; // Today's date (format: YYYY-MM-DD)
+    if (date_filter === 'overdue') {
+      // Overdue: due_date < today AND status is not Completed
+      query += ' AND due_date < ? AND status != ?';
+      params.push(today, 'Completed');
+    } else if (date_filter === 'upcoming') {
+      // Upcoming: due_date >= today AND due_date <= today + 7 days
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      const nextWeekStr = nextWeek.toISOString().split('T')[0];
+      query += ' AND due_date >= ? AND due_date <= ?';
+      params.push(today, nextWeekStr);
+    }
+  }
+
+  // Apply sorting
   query += ` ORDER BY ${sortColumn} ${sortOrder}`;
 
+  // Execute query and return results
   db.all(query, params, (err, tasks) => {
     if (err) {
       return res.status(500).json({ detail: 'Failed to fetch tasks: ' + err.message });

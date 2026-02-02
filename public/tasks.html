@@ -40,10 +40,11 @@
 <body>
   <h1>Task Manager</h1>
   
-  
+  <!-- Filter and Sort Section -->
   <div class="filter-section">
     <h3>Filter & Sort Tasks</h3>
     <div>
+      <!-- Existing Status Filter -->
       <label>Status:</label>
       <select id="statusFilter">
         <option value="">All</option>
@@ -52,6 +53,7 @@
         <option value="Completed">Completed</option>
       </select>
 
+      <!-- Existing Priority Filter -->
       <label style="margin-left: 10px;">Priority:</label>
       <select id="priorityFilter">
         <option value="">All</option>
@@ -60,6 +62,15 @@
         <option value="High">High</option>
       </select>
 
+      <!-- New: Date Filter -->
+      <label style="margin-left: 10px;">Date Filter:</label>
+      <select id="dateFilter">
+        <option value="">All Tasks</option>
+        <option value="overdue">Overdue Tasks</option>
+        <option value="upcoming">Upcoming Tasks (Next 7 Days)</option>
+      </select>
+
+      <!-- Existing Sort Controls -->
       <label style="margin-left: 10px;">Sort By:</label>
       <select id="sortBy">
         <option value="created_at">Created Date</option>
@@ -76,14 +87,14 @@
     </div>
   </div>
 
-  
+  <!-- Message Alerts -->
   <div id="errorMsg"></div>
   <div id="successMsg"></div>
 
-
+  <!-- Task Display Container -->
   <div id="tasksContainer"></div>
 
- 
+  <!-- Import Interaction Script -->
   <script src="js/tasks.js"></script>
 </body>
 </html>
