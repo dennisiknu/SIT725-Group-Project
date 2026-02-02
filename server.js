@@ -10,6 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // .use
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,7 +26,6 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-
 
 app.post('/api/register', async (req, res) => {
     try {

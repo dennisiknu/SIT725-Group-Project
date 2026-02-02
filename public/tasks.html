@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Task Manager - Filter & Sort</title>
@@ -10,19 +11,28 @@
       border: 1px solid #ddd;
       border-radius: 8px;
     }
+
     .task-card {
       margin: 10px 0;
       padding: 15px;
       border: 1px solid #eee;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
     .status-select {
       padding: 4px;
       margin-left: 8px;
     }
-    #errorMsg { color: #dc3545; }
-    #successMsg { color: #28a745; }
+
+    #errorMsg {
+      color: #dc3545;
+    }
+
+    #successMsg {
+      color: #28a745;
+    }
+
     button {
       padding: 4px 8px;
       margin-left: 8px;
@@ -32,14 +42,16 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
     button:hover {
       background: #0056b3;
     }
   </style>
 </head>
+
 <body>
   <h1>Task Manager</h1>
-  
+
   <!-- Filter and Sort Section -->
   <div class="filter-section">
     <h3>Filter & Sort Tasks</h3>
@@ -91,10 +103,10 @@
   <div id="errorMsg"></div>
   <div id="successMsg"></div>
 
-  <!-- Task Display Container -->
-  <div id="tasksContainer"></div>
+  <div id="taskList"></div>
 
   <!-- Import Interaction Script -->
   <script src="js/tasks.js"></script>
 </body>
+
 </html>

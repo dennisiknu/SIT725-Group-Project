@@ -1,168 +1,241 @@
 // public/js/tasks.js
-document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize filter/sort event listeners
+
+document.addEventListener('DOMContentLoaded', () => {
   initFilterSortEvents();
-  // Load task list with default filters
-  await loadTasks();
+  loadTasks();
 });
 
+function showMessage(elementId, message, color) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.textContent = message;
+  el.style.color = color || '';
+  setTimeout(() => { el.textContent = ''; }, 3000);
+}
+
+function formatDateForInput(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return '';
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function escapeAttr(str) {
+  return String(str || '').replaceAll('"', '&quot;');
+}
+
 /**
- * Core function: Load filtered/sorted tasks from backend
+ * Load filtered/sorted tasks from backend (MongoDB)
  */
 async function loadTasks() {
-  try {
-    // Get date filter parameter (new)
-    const dateFilter = document.getElementById('dateFilter').value || '';
-    // Get existing filter parameters
-    const status = document.getElementById('statusFilter').value || '';
-    const priority = document.getElementById('priorityFilter').value || '';
-    const sortBy = document.getElementById('sortBy').value || 'created_at';
-    const sortOrder = document.getElementById('sortOrder').value || 'desc';
+  const taskList = document.getElementById('taskList');
+  if (!taskList) return;
 
-    // Build URL parameters
+  taskList.innerHTML = '';
+  showMessage('errorMsg', '', '');
+  showMessage('successMsg', '', '');
+
+  try {
+    // Read dropdown values from tasks.html
+    const dateFilter = document.getElementById('dateFilter')?.value || '';
+    const status = document.getElementById('statusFilter')?.value || '';
+    const priority = document.getElementById('priorityFilter')?.value || '';
+    const sortBy = document.getElementById('sortBy')?.value || 'created_at';
+    const sortOrder = document.getElementById('sortOrder')?.value || 'desc';
+
+    // Build query string
     const params = new URLSearchParams();
     if (status) params.append('status', status);
     if (priority) params.append('priority', priority);
-    if (dateFilter) params.append('date_filter', dateFilter); // Add date filter (new)
+    if (dateFilter) params.append('date_filter', dateFilter); // Only works if backend supports it
     params.append('sort_by', sortBy);
     params.append('sort_order', sortOrder);
 
-    // Fetch filtered tasks from backend
-    const response = await fetch(`/api/tasks/filter?${params}`, {
+    const res = await fetch(`/api/tasks/filter?${params.toString()}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to load tasks');
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(text.slice(0, 120));
     }
 
-    const tasks = await response.json();
-    renderTasks(tasks);
-  } catch (error) {
-    showMessage('errorMsg', error.message, 'red');
-  }
-}
-
-/**
- * Core function: Update task status and progress
- * @param {number} taskId - ID of the task to update
- */
-async function updateTaskStatus(taskId) {
-  try {
-    // Get selected status and progress
-    const status = document.getElementById(`status-${taskId}`).value;
-    const progress = parseFloat(document.getElementById(`progress-${taskId}`).value);
-
-    // Validate progress range (0-100)
-    if (progress < 0 || progress > 100) {
-      showMessage('errorMsg', 'Progress must be between 0 and 100', 'red');
+    if (!res.ok) {
+      showMessage('errorMsg', data?.message || 'Failed to load tasks', 'red');
       return;
     }
 
-    // Update task via PUT request
-    const response = await fetch(`/api/tasks/${taskId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status, progress })
+    if (!Array.isArray(data) || data.length === 0) {
+      taskList.innerHTML = '<p>No tasks found.</p>';
+      return;
+    }
+
+    data.forEach((task) => {
+      const card = document.createElement('div');
+      card.className = 'task-card';
+
+      const due = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—';
+      const created = task.createdAt ? new Date(task.createdAt).toLocaleString() : '—';
+
+      const view = document.createElement('div');
+      view.innerHTML = `
+        <strong>${task.title}</strong>
+        <div>Category: ${task.category || 'General'}</div>
+        <div>Priority: ${task.priority || 'Medium'}</div>
+        <div>Status: ${task.status || 'To Do'}</div>
+        <div>Due: ${due}</div>
+        <div><small>Created: ${created}</small></div>
+        <div style="margin-top:8px;">
+          <button class="editBtn">Edit</button>
+          <button class="delBtn" style="margin-left:6px;">Delete</button>
+        </div>
+      `;
+
+      const edit = document.createElement('div');
+      edit.style.display = 'none';
+      edit.style.marginTop = '10px';
+      edit.innerHTML = `
+        <div>
+          <label>Title</label><br/>
+          <input type="text" class="editTitle" value="${escapeAttr(task.title)}" />
+        </div>
+
+        <div style="margin-top:8px;">
+          <label>Category</label><br/>
+          <input type="text" class="editCategory" value="${escapeAttr(task.category || 'General')}" />
+        </div>
+
+        <div style="margin-top:8px;">
+          <label>Priority</label><br/>
+          <select class="editPriority">
+            <option value="Low" ${task.priority === 'Low' ? 'selected' : ''}>Low</option>
+            <option value="Medium" ${(!task.priority || task.priority === 'Medium') ? 'selected' : ''}>Medium</option>
+            <option value="High" ${task.priority === 'High' ? 'selected' : ''}>High</option>
+          </select>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label>Due Date</label><br/>
+          <input type="date" class="editDueDate" value="${formatDateForInput(task.dueDate)}" />
+        </div>
+
+        <div style="margin-top:8px;">
+          <label>Status</label><br/>
+          <select class="editStatus">
+            <option value="To Do" ${(!task.status || task.status === 'To Do') ? 'selected' : ''}>To Do</option>
+            <option value="In Progress" ${task.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+            <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
+          </select>
+        </div>
+
+        <div style="margin-top:10px;">
+          <button class="saveBtn">Save</button>
+          <button class="cancelBtn" style="margin-left:6px;">Cancel</button>
+        </div>
+      `;
+
+      // Button wiring
+      const editBtn = view.querySelector('.editBtn');
+      const delBtn = view.querySelector('.delBtn');
+      const saveBtn = edit.querySelector('.saveBtn');
+      const cancelBtn = edit.querySelector('.cancelBtn');
+
+      editBtn.addEventListener('click', () => {
+        view.style.display = 'none';
+        edit.style.display = 'block';
+      });
+
+      cancelBtn.addEventListener('click', () => {
+        edit.style.display = 'none';
+        view.style.display = 'block';
+      });
+
+      delBtn.addEventListener('click', async () => {
+        const ok = confirm('Are you sure you want to delete this task?');
+        if (!ok) return;
+
+        try {
+          const r = await fetch(`/api/tasks/${task._id}`, { method: 'DELETE' });
+          const t = await r.text();
+          let d;
+          try { d = JSON.parse(t); } catch { d = {}; }
+
+          if (!r.ok) {
+            showMessage('errorMsg', d?.message || 'Delete failed', 'red');
+            return;
+          }
+
+          showMessage('successMsg', 'Task deleted', 'green');
+          loadTasks();
+        } catch {
+          showMessage('errorMsg', 'Error while deleting', 'red');
+        }
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const newTitle = edit.querySelector('.editTitle').value.trim();
+        const newCategory = edit.querySelector('.editCategory').value.trim();
+        const newPriority = edit.querySelector('.editPriority').value;
+        const newDueDate = edit.querySelector('.editDueDate').value; // yyyy-mm-dd or ""
+        const newStatus = edit.querySelector('.editStatus').value;
+
+        if (!newTitle || newTitle.length < 3) {
+          showMessage('errorMsg', 'Title must be at least 3 characters.', 'red');
+          return;
+        }
+
+        try {
+          const r = await fetch(`/api/tasks/${task._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: newTitle,
+              category: newCategory || 'General',
+              priority: newPriority,
+              dueDate: newDueDate || '',
+              status: newStatus
+            })
+          });
+
+          const t = await r.text();
+          let d;
+          try { d = JSON.parse(t); } catch { d = {}; }
+
+          if (!r.ok) {
+            showMessage('errorMsg', d?.message || 'Update failed', 'red');
+            return;
+          }
+
+          showMessage('successMsg', 'Task updated', 'green');
+          loadTasks();
+        } catch {
+          showMessage('errorMsg', 'Error while updating', 'red');
+        }
+      });
+
+      card.appendChild(view);
+      card.appendChild(edit);
+      taskList.appendChild(card);
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to update task');
-    }
-
-    // Refresh task list after update
-    await loadTasks();
-    showMessage('successMsg', 'Task updated successfully!', 'green');
-  } catch (error) {
-    showMessage('errorMsg', error.message, 'red');
+  } catch (err) {
+    showMessage('errorMsg', `Error while loading tasks: ${err.message}`, 'red');
   }
 }
 
 /**
- * Helper function: Render task list to DOM
- * @param {Array} tasks - List of tasks from backend
- */
-function renderTasks(tasks) {
-  const container = document.getElementById('tasksContainer');
-  container.innerHTML = '';
-  const today = new Date().toISOString().split('T')[0]; // Today's date (YYYY-MM-DD)
-
-  if (tasks.length === 0) {
-    container.innerHTML = '<p>No tasks found</p>';
-    return;
-  }
-
-  tasks.forEach(task => {
-    const taskCard = document.createElement('div');
-    taskCard.className = 'task-card';
-    
-    // Check if task is overdue (new)
-    const isOverdue = task.due_date && task.due_date < today && task.status !== 'Completed';
-    // Highlight overdue tasks with red border and text
-    if (isOverdue) {
-      taskCard.style.borderLeft = '4px solid red';
-      taskCard.style.color = '#dc3545';
-    }
-
-    // Format dates for display
-    const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date';
-    const createdAt = new Date(task.created_at).toLocaleString();
-
-    // Build task card HTML
-    taskCard.innerHTML = `
-      <h3>${task.title}</h3>
-      <p><strong>Description:</strong> ${task.description || 'No description'}</p>
-      <p><strong>Status:</strong> 
-        <select id="status-${task.id}" class="status-select">
-          <option value="To Do" ${task.status === 'To Do' ? 'selected' : ''}>To Do</option>
-          <option value="In Progress" ${task.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-          <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
-        </select>
-      </p>
-      <p><strong>Progress:</strong> 
-        <input type="number" id="progress-${task.id}" min="0" max="100" value="${task.progress}" style="width: 60px;">%
-        <button onclick="updateTaskStatus(${task.id})">Save</button>
-      </p>
-      <p><strong>Priority:</strong> ${task.priority}</p>
-      <p><strong>Due Date:</strong> ${dueDate} ${isOverdue ? '(Overdue)' : ''}</p>
-      <p><small>Created at: ${createdAt}</small></p>
-    `;
-    container.appendChild(taskCard);
-  });
-}
-
-/**
- * Helper function: Initialize filter/sort event listeners
+ * Wire up dropdown change events
  */
 function initFilterSortEvents() {
-  // Add change event to all filter/sort controls (include dateFilter)
-  ['statusFilter', 'priorityFilter', 'dateFilter', 'sortBy', 'sortOrder'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.addEventListener('change', loadTasks);
-    }
+  ['statusFilter', 'priorityFilter', 'dateFilter', 'sortBy', 'sortOrder'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', loadTasks);
   });
-}
-
-/**
- * Helper function: Display temporary message to user
- * @param {string} elementId - ID of message container
- * @param {string} message - Message text to display
- * @param {string} color - Text color (e.g., 'red', 'green')
- */
-function showMessage(elementId, message, color) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.textContent = message;
-    element.style.color = color;
-    // Clear message after 3 seconds
-    setTimeout(() => element.textContent = '', 3000);
-  }
 }
