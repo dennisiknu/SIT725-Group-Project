@@ -3,19 +3,234 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tasks</title>
+  <title>Tasks • Task Management App</title>
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="apple-touch-icon" href="/images/logo.png" />
 </head>
 <body>
-  <h1>All Tasks</h1>
+  <div class="container">
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="brand">
+        <img src="/images/logo.png" alt="App logo" class="brandLogo" />
+        <div class="brandText">
+          <strong>Task Board</strong>
+          <span></span>
+        </div>
+      </div>
 
-  <div style="margin-bottom: 10px;">
-    <a href="/index.html"><button>Home</button></a>
-    <a href="/createtask.html" style="margin-left: 8px;"><button>Create Task</button></a>
+      <div class="search">
+        <input id="searchInput" class="input" type="text" placeholder="Search tasks by title or category..." />
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a href="/index.html" class="btn btnSecondary">Home</a>
+        <a href="/createtask.html" class="btn btnGradient">+ Create Task</a>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+      <!-- Main -->
+      <main>
+        <div class="section">
+          <div class="sectionHead">
+            <div>
+              <h1 class="pageTitle">My Tasks</h1>
+              <p class="pageHint">Stay on top of what matters. Edit, delete, filter — all in one place.</p>
+            </div>
+            <div class="footerLinks">
+              <button id="refreshBtn" class="btn btnSecondary" type="button">Refresh</button>
+            </div>
+          </div>
+        </div>
+
+        <section class="section">
+          <div class="sectionHead">
+            <h2>To Do</h2>
+            <p id="pendingCount">0 tasks</p>
+          </div>
+          <div id="pendingList" class="grid"></div>
+        </section>
+
+        <section class="section">
+          <div class="sectionHead">
+            <h2>Done</h2>
+            <p id="completedCount">0 tasks</p>
+          </div>
+          <div id="completedList" class="grid"></div>
+        </section>
+      </main>
+
+      <!-- Right bar -->
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Quick Add</h3>
+          <div class="formGrid">
+            <div>
+              <label class="label" for="qaTitle">Title *</label>
+              <input id="qaTitle" class="input" type="text" placeholder="e.g., Finish SRS section" />
+            </div>
+
+            <div class="panelRow">
+              <div style="flex:1;">
+                <label class="label" for="qaPriority">Priority</label>
+                <select id="qaPriority" class="select">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+              <div style="flex:1;">
+                <label class="label" for="qaStatus">Status</label>
+                <select id="qaStatus" class="select">
+                  <option value="Pending" selected>Pending</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="panelRow">
+              <div style="flex:1;">
+                <label class="label" for="qaCategory">Category</label>
+                <input id="qaCategory" class="input" type="text" placeholder="General" />
+              </div>
+              <div style="flex:1;">
+                <label class="label" for="qaDue">Due date</label>
+                <input id="qaDue" class="input" type="date" />
+              </div>
+            </div>
+
+            <button id="qaAddBtn" class="btn btnGradient" type="button">Add Task</button>
+            <small>Tip: you can still use the full “Create Task” page for a cleaner form.</small>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Filters</h3>
+          <div class="formGrid">
+            <div>
+              <label class="label" for="filterStatus">Status</label>
+              <select id="filterStatus" class="select">
+                <option value="All" selected>All</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="filterPriority">Priority</label>
+              <select id="filterPriority" class="select">
+                <option value="All" selected>All</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="sortBy">Sort</label>
+              <select id="sortBy" class="select">
+                <option value="Newest" selected>Newest</option>
+                <option value="DueSoon">Due date (soonest)</option>
+                <option value="Title">Title (A → Z)</option>
+              </select>
+            </div>
+
+            <button id="clearFiltersBtn" class="btn btnSecondary" type="button">Clear filters</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Stats</h3>
+          <div class="miniStats">
+            <div class="stat">
+              <div class="num" id="statTotal">0</div>
+              <div class="lab">Total</div>
+            </div>
+            <div class="stat">
+              <div class="num" id="statDone">0</div>
+              <div class="lab">Completed</div>
+            </div>
+            <div class="stat">
+              <div class="num" id="statTodo">0</div>
+              <div class="lab">Pending</div>
+            </div>
+          </div>
+
+          <hr class="sep" />
+
+          <div class="footerLinks">
+            <a href="/createtask.html" class="btn btnPrimary" style="width:100%;">Open Create Task</a>
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
 
-  <p id="msg"></p>
+  <!-- Toast -->
+  <div id="msg" class="toast" role="status" aria-live="polite">
+    <div class="title" id="toastTitle">Notice</div>
+    <div class="body" id="toastBody"></div>
+  </div>
 
-  <div id="taskList"></div>
+  <!-- Edit modal -->
+  <div id="editOverlay" class="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitleText">
+      <div class="modalTop">
+        <strong id="editTitleText">Edit Task</strong>
+        <button id="editCloseBtn" class="btn btnIcon" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modalBody">
+        <input type="hidden" id="editId" />
+
+        <div class="formGrid">
+          <div>
+            <label class="label" for="editTitle">Title *</label>
+            <input id="editTitle" class="input" type="text" />
+          </div>
+
+          <div class="modalGrid">
+            <div>
+              <label class="label" for="editCategory">Category</label>
+              <input id="editCategory" class="input" type="text" placeholder="General" />
+            </div>
+
+            <div>
+              <label class="label" for="editDueDate">Due date</label>
+              <input id="editDueDate" class="input" type="date" />
+            </div>
+
+            <div>
+              <label class="label" for="editPriority">Priority</label>
+              <select id="editPriority" class="select">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="editStatus">Status</label>
+              <select id="editStatus" class="select">
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <small>Changes are saved directly to the database when you hit “Save changes”.</small>
+        </div>
+      </div>
+
+      <div class="modalActions">
+        <button id="editCancelBtn" class="btn btnSecondary" type="button">Cancel</button>
+        <button id="editSaveBtn" class="btn btnGradient" type="button">Save changes</button>
+      </div>
+    </div>
+  </div>
 
   <script src="/js/tasks.js"></script>
 </body>

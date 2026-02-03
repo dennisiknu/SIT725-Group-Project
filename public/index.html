@@ -2,35 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Task Management App</title>
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="apple-touch-icon" href="/images/logo.png" />
 </head>
 <body>
-  <h1>Task Management App</h1>
+  <div class="container">
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="brand">
+        <img src="/images/logo.png" alt="App logo" class="brandLogo" />
+        <div class="brandText">
+          <strong>Task Management</strong>
+          <span>Organise tasks. Stay focused.</span>
+        </div>
+      </div>
 
-  <p>Where you would like to go</p>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a href="/login.html" class="btn btnSecondary">Login</a>
+        <a href="/register.html" class="btn btnGradient">Register</a>
+      </div>
+    </div>
 
-  <div>
-    <a href="/login.html">
-      <button>Login</button>
-    </a>
-  </div>
+    <!-- Simple hero -->
+    <div style="margin-top:18px;">
+      <div class="card" style="padding:22px;">
+        <h1 class="pageTitle" style="margin:10px 0 8px 0;">
+          Manage tasks in one clean dashboard.
+        </h1>
 
-  <div style="margin-top:10px;">
-    <a href="/register.html">
-      <button>Register</button>
-    </a>
-  </div>
+        <p class="pageHint" style="max-width: 65ch; margin-top:0;">
+          Create tasks, set priority and status, and keep track of what’s pending or completed.
+        </p>
 
-  <div style="margin-top:10px;">
-    <a href="/createtask.html">
-      <button>Create Task</button>
-    </a>
-  </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:16px;">
+          <a href="/tasks.html" class="btn btnGradient">Open Dashboard</a>
+          <a href="/createtask.html" class="btn btnSecondary">Create Task</a>
+        </div>
 
-  <div style="margin-top:10px;">
-    <a href="/tasks.html">
-      <button>Tasks</button>
-    </a>
+        <hr class="sep" />
+<!--
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a href="/tasks.html" class="btn btnPrimary">Tasks</a>
+          <a href="/createtask.html" class="btn btnSecondary">Create</a>
+          <a href="/login.html" class="btn btnSecondary">Login</a>
+          <a href="/register.html" class="btn btnSecondary">Register</a>
+        </div> -->
+      </div>
+    </div>
   </div>
 </body>
 </html>

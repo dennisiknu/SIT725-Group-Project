@@ -1,31 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login • TaskFlow</title>
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="apple-touch-icon" href="/images/logo.png" />
 </head>
-
 <body>
+  <div class="centerWrap">
+    <div class="authCard">
+      <div class="authHead">
+        <img src="/images/logo.png" alt="App logo" class="brandLogoSm" />
+        <div>
+          <h1 style="margin:0;">Login</h1>
+          <p class="pageHint" style="margin:4px 0 0 0;">Welcome back. Let’s get productive.</p>
+        </div>
+      </div>
 
-    <h1>Login</h1>
+      <form id="loginForm" class="formGrid">
+        <div>
+          <label class="label" for="email">Email</label>
+          <input class="input" type="email" id="email" required placeholder="you@example.com" />
+        </div>
 
-    <form id="loginForm">
-        <label>Email</label><br />
-        <input type="email" id="email" required /><br /><br />
+        <div>
+          <label class="label" for="password">Password</label>
+          <input class="input" type="password" id="password" required placeholder="••••••••" />
+        </div>
 
-        <label>Password</label><br />
-        <input type="password" id="password" required /><br /><br />
+        <button class="btn btnGradient" type="submit" style="width:100%;">Login</button>
 
-        <button type="submit">Login</button>
-    </form>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn btnSecondary" href="/index.html" style="flex:1; text-align:center;">Home</a>
+          <a class="btn btnSecondary" href="/register.html" style="flex:1; text-align:center;">Register</a>
+        </div>
 
-    <button id="logoutBtn">Logout</button>
+        <button class="btn btnDanger" id="logoutBtn" type="button" style="width:100%;">Logout</button>
 
-    <p id="message"></p>
+        <p id="message" class="helpText" style="margin:0;"></p>
+      </form>
+    </div>
+  </div>
 
-    <script src="/js/login.js"></script>
+  <script src="/js/login.js"></script>
 </body>
-
 </html>
