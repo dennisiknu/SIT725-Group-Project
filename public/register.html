@@ -1,31 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register • TaskFlow</title>
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="apple-touch-icon" href="/images/logo.png" />
 </head>
-
 <body>
-    <h1>Register</h1>
+  <div class="centerWrap">
+    <div class="authCard">
+      <div class="authHead">
+        <img src="/images/logo.png" alt="App logo" class="brandLogoSm" />
+        <div>
+          <h1 style="margin:0;">Register</h1>
+          <p class="pageHint" style="margin:4px 0 0 0;">Create your account to start managing tasks.</p>
+        </div>
+      </div>
 
-    <form id="registerForm">
-        <label>Username</label><br>
-        <input type="text" id="username" required><br><br>
+      <form id="registerForm" class="formGrid">
+        <div>
+          <label class="label" for="username">Username</label>
+          <input class="input" type="text" id="username" required placeholder="e.g., Meet" />
+        </div>
 
-        <label>Email</label><br>
-        <input type="email" id="email" required><br><br>
+        <div>
+          <label class="label" for="email">Email</label>
+          <input class="input" type="email" id="email" required placeholder="you@example.com" />
+        </div>
 
-        <label>Password</label><br>
-        <input type="password" id="password" required><br><br>
+        <div>
+          <label class="label" for="password">Password</label>
+          <input class="input" type="password" id="password" required placeholder="••••••••" />
+        </div>
 
-        <button type="submit">Create Account</button>
-    </form>
+        <button class="btn btnGradient" type="submit" style="width:100%;">Create Account</button>
 
-    <p id="message"></p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn btnSecondary" href="/index.html" style="flex:1; text-align:center;">Home</a>
+          <a class="btn btnSecondary" href="/login.html" style="flex:1; text-align:center;">Login</a>
+        </div>
 
-    <script src="/js/register.js"></script>
+        <p id="message" class="helpText" style="margin:0;"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/register.js"></script>
 </body>
-
 </html>
