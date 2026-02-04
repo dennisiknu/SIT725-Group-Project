@@ -10,6 +10,7 @@ const refreshBtn = document.getElementById('refreshBtn');
 const searchInput = document.getElementById('searchInput');
 const filterStatus = document.getElementById('filterStatus');
 const filterPriority = document.getElementById('filterPriority');
+const filterDue = document.getElementById('filterDue');
 const sortBy = document.getElementById('sortBy');
 const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 
@@ -24,12 +25,10 @@ const statTotal = document.getElementById('statTotal');
 const statDone = document.getElementById('statDone');
 const statTodo = document.getElementById('statTodo');
 
-// Toast (msg)
 const toast = document.getElementById('msg');
 const toastTitle = document.getElementById('toastTitle');
 const toastBody = document.getElementById('toastBody');
 
-// Edit modal
 const editOverlay = document.getElementById('editOverlay');
 const editCloseBtn = document.getElementById('editCloseBtn');
 const editCancelBtn = document.getElementById('editCancelBtn');
@@ -42,10 +41,8 @@ const editDueDate = document.getElementById('editDueDate');
 const editPriority = document.getElementById('editPriority');
 const editStatus = document.getElementById('editStatus');
 
-// ------- State ----------
 let allTasks = [];
 
-// ---------- Helpers -------
 function escapeHtml(str = '') {
   return String(str)
     .replaceAll('&', '&amp;')
@@ -85,6 +82,19 @@ function getStatusPill(status) {
   return { cls: 'pillBlue', label: 'Pending' };
 }
 
+function priorityScore(priority) {
+  const p = (priority || 'Medium');
+  if (p === 'High') return 3;
+  if (p === 'Medium') return 2;
+  if (p === 'Low') return 1;
+  return 2;
+}
+
+function progressScore(status) {
+  const s = status || 'Pending';
+  return s === 'Completed' ? 2 : 1;
+}
+
 let toastTimer = null;
 function showToast(title, body = '', type = 'success') {
   if (!toast) return;
@@ -120,11 +130,22 @@ function isOverdue(task) {
   return d < today;
 }
 
-// ----- Rendering ----------
+function isUpcoming(task) {
+  if (!task?.dueDate) return false;
+  if ((task?.status || 'Pending') === 'Completed') return false;
+  const d = new Date(task.dueDate);
+  if (Number.isNaN(d.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  d.setHours(0, 0, 0, 0);
+  return d >= today;
+}
+
 function applyFilters(tasks) {
   const q = (searchInput?.value || '').trim().toLowerCase();
   const statusVal = filterStatus?.value || 'All';
   const priorityVal = filterPriority?.value || 'All';
+  const dueVal = filterDue?.value || 'All';
   const sortVal = sortBy?.value || 'Newest';
 
   let filtered = [...tasks];
@@ -145,6 +166,12 @@ function applyFilters(tasks) {
     filtered = filtered.filter(t => (t.priority || 'Medium') === priorityVal);
   }
 
+  if (dueVal === 'Overdue') {
+    filtered = filtered.filter(isOverdue);
+  } else if (dueVal === 'Upcoming') {
+    filtered = filtered.filter(isUpcoming);
+  }
+
   if (sortVal === 'Title') {
     filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
   } else if (sortVal === 'DueSoon') {
@@ -153,6 +180,14 @@ function applyFilters(tasks) {
       const bd = b.dueDate ? new Date(b.dueDate).getTime() : Number.POSITIVE_INFINITY;
       return ad - bd;
     });
+  } else if (sortVal === 'PriorityHigh') {
+    filtered.sort((a, b) => priorityScore(b.priority) - priorityScore(a.priority));
+  } else if (sortVal === 'PriorityLow') {
+    filtered.sort((a, b) => priorityScore(a.priority) - priorityScore(b.priority));
+  } else if (sortVal === 'ProgressAsc') {
+    filtered.sort((a, b) => progressScore(a.status) - progressScore(b.status));
+  } else if (sortVal === 'ProgressDesc') {
+    filtered.sort((a, b) => progressScore(b.status) - progressScore(a.status));
   } else {
     filtered.sort((a, b) => {
       const ac = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -237,7 +272,6 @@ function render(tasks) {
     : `<div class="empty">No matching completed tasks yet.</div>`;
 }
 
-// ---------- APIs -----
 async function loadTasks() {
   setLoading(true);
   try {
@@ -291,7 +325,6 @@ async function deleteTask(id) {
   return { res, data };
 }
 
-// ------- Modal ----------
 function openEditModal(task) {
   editId.value = task._id;
   editTitle.value = task.title || '';
@@ -356,12 +389,12 @@ editSaveBtn.addEventListener('click', async () => {
   }
 });
 
-// --------- Events ----------
 const rerender = () => render(allTasks);
 
 if (searchInput) searchInput.addEventListener('input', rerender);
 if (filterStatus) filterStatus.addEventListener('change', rerender);
 if (filterPriority) filterPriority.addEventListener('change', rerender);
+if (filterDue) filterDue.addEventListener('change', rerender);
 if (sortBy) sortBy.addEventListener('change', rerender);
 
 if (clearFiltersBtn) {
@@ -369,6 +402,7 @@ if (clearFiltersBtn) {
     if (searchInput) searchInput.value = '';
     if (filterStatus) filterStatus.value = 'All';
     if (filterPriority) filterPriority.value = 'All';
+    if (filterDue) filterDue.value = 'All';
     if (sortBy) sortBy.value = 'Newest';
     render(allTasks);
   });
@@ -376,7 +410,6 @@ if (clearFiltersBtn) {
 
 if (refreshBtn) refreshBtn.addEventListener('click', loadTasks);
 
-// ----- Quick Add ----------
 if (qaAddBtn) {
   qaAddBtn.addEventListener('click', async () => {
     const title = qaTitle.value.trim();
@@ -422,7 +455,6 @@ if (qaAddBtn) {
   });
 }
 
-// ---------- Card actions------
 document.addEventListener('click', async (e) => {
   const editBtn = e.target.closest('.js-edit');
   const delBtn = e.target.closest('.js-delete');
@@ -461,14 +493,12 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-// close modal with ESC
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && editOverlay && editOverlay.classList.contains('show')) {
     closeEditModal();
   }
 });
 
-// ---------- Icons -------
 const icons = {
   pencil: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -485,5 +515,4 @@ const icons = {
     </svg>`
 };
 
-// ------- Start ----------
 loadTasks();
