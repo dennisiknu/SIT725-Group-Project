@@ -525,3 +525,19 @@ hr.sep{
   color: var(--muted);
   font-size: 13px;
 }
+
+/* Template dropdown row */
+.templateRow{
+  display:flex;
+  gap: 10px;
+  align-items: center;
+}
+.templateRow .select{
+  flex: 1;
+}
+
+/* Make the templates button slightly wider + clear */
+.btnTpl{
+  padding: 10px 16px;
+  white-space: nowrap;
+}

@@ -37,15 +37,19 @@
         <form id="taskForm" class="formGrid">
           
             <div>
-            <label class="label" for="templateSelect">Start from Template</label>
-            <select class="select" id="templateSelect">
-              <option value="">— None —</option>
-            </select>
+              <label class="label" for="templateSelect">Start from Template</label>
 
-            <div class="pageHint" style="margin-top:6px;">
-              <a href="/templates.html">Manage templates</a>
+              <div class="templateRow">
+                <select class="select" id="templateSelect">
+                  <option value="">— None —</option>
+                </select>
+
+                <a href="/templates.html" class="btn btnGradient btnTpl">
+                  Templates
+                </a>
+              </div>
             </div>
-          </div>
+
 
           <div>
             <label class="label" for="title">Title *</label>
