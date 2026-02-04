@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const Task = require('./models/Task');
 const User = require('./models/User');
@@ -29,26 +31,104 @@ app.use(session({
 
 app.post('/api/register', async (req, res) => {
     try {
-        const user = new User(req.body);
+        const { username, email, password } = req.body;
+
+        const existing = await User.findOne({ email });
+        if (existing) {
+            return res.status(400).json({ error: 'Email already registered.' });
+        }
+
+        const hashed = await bcrypt.hash(password, 10);
+
+        const user = new User({ username, email, password: hashed });
         await user.save();
+
         req.session.userId = user._id;
         res.status(201).json({ message: 'User registered' });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        res.status(400).json({ error: err.message });
     }
 });
 
-app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email, password });
+app.post('/api/register', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
 
-    if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        const existing = await User.findOne({ email });
+        if (existing) {
+            return res.status(400).json({ error: 'Email already registered.' });
+        }
+
+        const hashed = await bcrypt.hash(password, 10);
+
+        const user = new User({ username, email, password: hashed });
+        await user.save();
+
+        req.session.userId = user._id;
+        res.status(201).json({ message: 'User registered' });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
     }
-
-    req.session.userId = user._id;
-    res.json({ message: 'Login successful' });
 });
+
+app.post('/api/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+
+        // Always return the same message (prevents account enumeration)
+        const genericMsg = 'If an account exists for that email, a reset link has been generated.';
+
+        if (!user) {
+            return res.json({ message: genericMsg });
+        }
+
+        const token = crypto.randomBytes(32).toString('hex');
+        user.resetToken = token;
+        user.resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+        await user.save();
+
+        // For uni demo: return a reset link (instead of sending email)
+        const resetUrl = `/resetpassword.html?token=${token}`;
+
+        res.json({ message: genericMsg, resetUrl });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+
+app.post('/api/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({ error: 'Missing token or password.' });
+        }
+
+        const user = await User.findOne({
+            resetToken: token,
+            resetTokenExpiry: { $gt: new Date() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid or expired token.' });
+        }
+
+        const hashed = await bcrypt.hash(password, 10);
+        user.password = hashed;
+        user.resetToken = null;
+        user.resetTokenExpiry = null;
+
+        await user.save();
+
+        res.json({ message: 'Password updated successfully. You can now log in.' });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 
 app.get('/api/me', async (req, res) => {
     if (!req.session.userId) {
