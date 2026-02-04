@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Templates • Task Management App</title>
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="apple-touch-icon" href="/images/logo.png" />
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <div class="brand">
+        <img src="/images/logo.png" alt="App logo" class="brandLogo" />
+        <div class="brandText">
+          <strong>Templates</strong>
+          <span>Reuse task presets</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a href="/tasks.html" class="btn btnSecondary">Back to Tasks</a>
+        <a href="/createtask.html" class="btn btnSecondary">Create Task</a>
+        <a href="/index.html" class="btn btnSecondary">Home</a>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <main>
+        <div class="section">
+          <div class="sectionHead">
+            <div>
+              <h1 class="pageTitle">Saved Templates</h1>
+              <p class="pageHint">Create a template once, then reuse it while creating tasks.</p>
+            </div>
+
+            <button id="refreshTemplatesBtn" class="btn btnSecondary">Refresh</button>
+          </div>
+
+          <div id="templatesList" class="gridCards"></div>
+          <div id="templatesEmpty" class="empty" style="display:none;">No templates yet. Create one from the right panel.</div>
+        </div>
+      </main>
+
+      <aside>
+        <div class="card" style="padding:16px;">
+          <h3 style="margin:0 0 10px 0;">Create Template</h3>
+
+          <form id="templateForm" class="formGrid">
+            <div>
+              <label class="label" for="tplName">Template Name *</label>
+              <input class="input" id="tplName" type="text" minlength="2" required placeholder="e.g., Weekly Report Task" />
+            </div>
+
+            <div>
+              <label class="label" for="tplTitle">Default Title</label>
+              <input class="input" id="tplTitle" type="text" placeholder="e.g., Finish SIT725 report" />
+            </div>
+
+            <div class="modalGrid">
+              <div>
+                <label class="label" for="tplCategory">Category</label>
+                <input class="input" id="tplCategory" type="text" placeholder="General" />
+              </div>
+
+              <div>
+                <label class="label" for="tplDueDate">Default Due Date</label>
+                <input class="input" id="tplDueDate" type="date" />
+              </div>
+
+              <div>
+                <label class="label" for="tplPriority">Priority</label>
+                <select class="select" id="tplPriority">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="label" for="tplStatus">Status</label>
+                <select class="select" id="tplStatus">
+                  <option value="Pending" selected>Pending</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:6px;">
+              <button class="btn btnGradient" type="submit">Save Template</button>
+            </div>
+          </form>
+
+          <p class="helpText" id="tplMsg"></p>
+        </div>
+
+        <div class="card" style="padding:16px; margin-top:12px;">
+          <p class="pageHint" style="margin:0;">
+            Tip: Use “Use Template” on a card to jump to Create Task with the form auto-filled.
+          </p>
+        </div>
+      </aside>
+    </div>
+
+  </div>
+
+  <script src="/js/templates.js"></script>
+</body>
+</html>

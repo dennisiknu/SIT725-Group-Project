@@ -35,6 +35,22 @@
         <p class="pageHint" style="margin-top:0;">Fill the details below. Status is required (Pending/Completed).</p>
 
         <form id="taskForm" class="formGrid">
+          
+            <div>
+              <label class="label" for="templateSelect">Start from Template</label>
+
+              <div class="templateRow">
+                <select class="select" id="templateSelect">
+                  <option value="">— None —</option>
+                </select>
+
+                <a href="/templates.html" class="btn btnGradient btnTpl">
+                  Templates
+                </a>
+              </div>
+            </div>
+
+
           <div>
             <label class="label" for="title">Title *</label>
             <input class="input" type="text" id="title" required minlength="3" placeholder="e.g., Finish group report" />
