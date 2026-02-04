@@ -12,7 +12,6 @@
 
 <body>
   <div class="container">
-    <!-- Top bar -->
     <div class="topbar">
       <div class="brand">
         <img src="/images/logo.png" alt="App logo" class="brandLogo" />
@@ -32,9 +31,7 @@
       </div>
     </div>
 
-    <!-- Dashboard -->
     <div class="dashboard">
-      <!-- Main -->
       <main>
         <div class="section">
           <div class="sectionHead">
@@ -65,7 +62,6 @@
         </section>
       </main>
 
-      <!-- Right bar -->
       <aside class="sidebar">
         <div class="panel">
           <h3>Quick Add</h3>
@@ -132,11 +128,24 @@
             </div>
 
             <div>
+              <label class="label" for="filterDue">Due</label>
+              <select id="filterDue" class="select">
+                <option value="All" selected>All</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Overdue">Overdue</option>
+              </select>
+            </div>
+
+            <div>
               <label class="label" for="sortBy">Sort</label>
               <select id="sortBy" class="select">
                 <option value="Newest" selected>Newest</option>
                 <option value="DueSoon">Due date (soonest)</option>
                 <option value="Title">Title (A → Z)</option>
+                <option value="PriorityHigh">Priority (High → Low)</option>
+                <option value="PriorityLow">Priority (Low → High)</option>
+                <option value="ProgressAsc">Progress (Pending → Completed)</option>
+                <option value="ProgressDesc">Progress (Completed → Pending)</option>
               </select>
             </div>
 
@@ -171,13 +180,11 @@
     </div>
   </div>
 
-  <!-- Toast -->
   <div id="msg" class="toast" role="status" aria-live="polite">
     <div class="title" id="toastTitle">Notice</div>
     <div class="body" id="toastBody"></div>
   </div>
 
-  <!-- Edit modal -->
   <div id="editOverlay" class="modalOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitleText">
       <div class="modalTop">
@@ -234,7 +241,6 @@
     </div>
   </div>
 
-  <!-- Import Interaction Script -->
   <script src="js/tasks.js"></script>
 </body>
 
