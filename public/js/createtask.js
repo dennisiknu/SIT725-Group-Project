@@ -107,7 +107,7 @@ form.addEventListener('submit', async (e) => {
       return;
     }
 
-    setMsg('Task created successfully ✅', 'green');
+    setMsg('Task created successfully ', 'green');
     form.reset();
 
     // keep defaults

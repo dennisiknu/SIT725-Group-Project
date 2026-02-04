@@ -115,8 +115,8 @@ function isOverdue(task) {
   const d = new Date(task.dueDate);
   if (Number.isNaN(d.getTime())) return false;
   const today = new Date();
-  today.setHours(0,0,0,0);
-  d.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
+  d.setHours(0, 0, 0, 0);
   return d < today;
 }
 
@@ -145,19 +145,15 @@ function applyFilters(tasks) {
     filtered = filtered.filter(t => (t.priority || 'Medium') === priorityVal);
   }
 
-  // sorting
   if (sortVal === 'Title') {
     filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
   } else if (sortVal === 'DueSoon') {
-    // tasks with no dueDate go last
     filtered.sort((a, b) => {
       const ad = a.dueDate ? new Date(a.dueDate).getTime() : Number.POSITIVE_INFINITY;
       const bd = b.dueDate ? new Date(b.dueDate).getTime() : Number.POSITIVE_INFINITY;
       return ad - bd;
     });
   } else {
-    // Newest (best-effort)
-    // Prefer createdAt if available; otherwise fall back to _id ordering.
     filtered.sort((a, b) => {
       const ac = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bc = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -220,7 +216,6 @@ function render(tasks) {
   const pending = filtered.filter(t => (t.status || 'Pending') !== 'Completed');
   const completed = filtered.filter(t => (t.status || 'Pending') === 'Completed');
 
-  // counts + stats (based on ALL tasks, not filtered)
   const totalAll = tasks.length;
   const doneAll = tasks.filter(t => (t.status || 'Pending') === 'Completed').length;
   const todoAll = totalAll - doneAll;
@@ -230,11 +225,9 @@ function render(tasks) {
   statTodo.textContent = String(todoAll);
   statOverdue.textContent = String(overdueAll);
 
-  // filtered counts shown near headings
   pendingCount.textContent = `${pending.length} task${pending.length === 1 ? '' : 's'}`;
   completedCount.textContent = `${completed.length} task${completed.length === 1 ? '' : 's'}`;
 
-  // render lists
   pendingList.innerHTML = pending.length
     ? pending.map(taskCardHTML).join('')
     : `<div class="empty">No matching pending tasks. Try clearing filters or adding a new task.</div>`;
@@ -248,8 +241,15 @@ function render(tasks) {
 async function loadTasks() {
   setLoading(true);
   try {
-    const res = await fetch('/api/tasks');
-    const data = await res.json();
+    const res = await fetch('/api/tasks', { method: 'GET' });
+
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(text.slice(0, 120));
+    }
 
     if (!res.ok) {
       showToast('Could not load tasks', data?.message || 'Please try again.', 'error');
@@ -359,64 +359,68 @@ editSaveBtn.addEventListener('click', async () => {
 // --------- Events ----------
 const rerender = () => render(allTasks);
 
-searchInput.addEventListener('input', rerender);
-filterStatus.addEventListener('change', rerender);
-filterPriority.addEventListener('change', rerender);
-sortBy.addEventListener('change', rerender);
+if (searchInput) searchInput.addEventListener('input', rerender);
+if (filterStatus) filterStatus.addEventListener('change', rerender);
+if (filterPriority) filterPriority.addEventListener('change', rerender);
+if (sortBy) sortBy.addEventListener('change', rerender);
 
-clearFiltersBtn.addEventListener('click', () => {
-  searchInput.value = '';
-  filterStatus.value = 'All';
-  filterPriority.value = 'All';
-  sortBy.value = 'Newest';
-  render(allTasks);
-});
+if (clearFiltersBtn) {
+  clearFiltersBtn.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    if (filterStatus) filterStatus.value = 'All';
+    if (filterPriority) filterPriority.value = 'All';
+    if (sortBy) sortBy.value = 'Newest';
+    render(allTasks);
+  });
+}
 
-refreshBtn.addEventListener('click', loadTasks);
+if (refreshBtn) refreshBtn.addEventListener('click', loadTasks);
 
 // ----- Quick Add ----------
-qaAddBtn.addEventListener('click', async () => {
-  const title = qaTitle.value.trim();
-  const category = qaCategory.value.trim();
-  const priority = qaPriority.value;
-  const status = qaStatus.value;
-  const dueDate = qaDue.value;
+if (qaAddBtn) {
+  qaAddBtn.addEventListener('click', async () => {
+    const title = qaTitle.value.trim();
+    const category = qaCategory.value.trim();
+    const priority = qaPriority.value;
+    const status = qaStatus.value;
+    const dueDate = qaDue.value;
 
-  if (!title || title.length < 3) {
-    showToast('Title required', 'Enter at least 3 characters.', 'error');
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const { res, data } = await createTask({
-      title,
-      category: category || 'General',
-      priority,
-      dueDate: dueDate || undefined,
-      status
-    });
-
-    if (!res.ok) {
-      const more = Array.isArray(data?.errors) && data.errors.length ? ` ${data.errors.join(' ')}` : '';
-      showToast('Create failed', (data?.message || 'Could not create task.') + more, 'error');
+    if (!title || title.length < 3) {
+      showToast('Title required', 'Enter at least 3 characters.', 'error');
       return;
     }
 
-    showToast('Created', 'Task added.', 'success');
-    qaTitle.value = '';
-    qaCategory.value = '';
-    qaPriority.value = 'Medium';
-    qaStatus.value = 'Pending';
-    qaDue.value = '';
+    setLoading(true);
+    try {
+      const { res, data } = await createTask({
+        title,
+        category: category || 'General',
+        priority,
+        dueDate: dueDate || undefined,
+        status
+      });
 
-    await loadTasks();
-  } catch (err) {
-    showToast('Network error', 'Error while creating task.', 'error');
-  } finally {
-    setLoading(false);
-  }
-});
+      if (!res.ok) {
+        const more = Array.isArray(data?.errors) && data.errors.length ? ` ${data.errors.join(' ')}` : '';
+        showToast('Create failed', (data?.message || 'Could not create task.') + more, 'error');
+        return;
+      }
+
+      showToast('Created', 'Task added.', 'success');
+      qaTitle.value = '';
+      qaCategory.value = '';
+      qaPriority.value = 'Medium';
+      qaStatus.value = 'Pending';
+      qaDue.value = '';
+
+      await loadTasks();
+    } catch (err) {
+      showToast('Network error', 'Error while creating task.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  });
+}
 
 // ---------- Card actions------
 document.addEventListener('click', async (e) => {
@@ -459,7 +463,7 @@ document.addEventListener('click', async (e) => {
 
 // close modal with ESC
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && editOverlay.classList.contains('show')) {
+  if (e.key === 'Escape' && editOverlay && editOverlay.classList.contains('show')) {
     closeEditModal();
   }
 });
