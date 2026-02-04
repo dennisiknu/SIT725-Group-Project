@@ -4,6 +4,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const Task = require('./models/Task');
 const User = require('./models/User');
+const Template = require('./models/Template');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true })); 
 
 const MONGO_URI = 'mongodb://127.0.0.1:27017/sit725_project';
+
+function requireAuth(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ message: 'Unauthorized. Please login.' });
+  }
+  next();
+}
+
 
 mongoose
     .connect(MONGO_URI)
@@ -99,6 +108,56 @@ app.put('/api/tasks/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
+
+// ---------- Templates API ----------
+app.get('/api/templates', requireAuth, async (req, res) => {
+  try {
+    const templates = await Template.find({ userId: req.session.userId }).sort({ createdAt: -1 });
+    res.json(templates);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load templates' });
+  }
+});
+
+app.post('/api/templates', requireAuth, async (req, res) => {
+  try {
+    const { name, title, category, priority, status, dueDate } = req.body;
+
+    if (!name || String(name).trim().length < 2) {
+      return res.status(400).json({ message: 'Template name must be at least 2 characters.' });
+    }
+
+    const created = await Template.create({
+      userId: req.session.userId,
+      name: String(name).trim(),
+      title: title ? String(title).trim() : '',
+      category: category ? String(category).trim() : 'General',
+      priority: priority || 'Medium',
+      status: status || 'Pending',
+      dueDate: dueDate ? new Date(dueDate) : undefined
+    });
+
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to create template' });
+  }
+});
+
+app.delete('/api/templates/:id', requireAuth, async (req, res) => {
+  try {
+    const deleted = await Template.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.session.userId
+    });
+
+    if (!deleted) return res.status(404).json({ message: 'Template not found' });
+
+    res.json({ message: 'Template deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete template' });
+  }
+});
+
 
 app.delete('/api/tasks/:id', async (req, res) => {
   try {

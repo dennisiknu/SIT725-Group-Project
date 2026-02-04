@@ -3,6 +3,7 @@ const completedList = document.getElementById('completedList');
 
 const pendingCount = document.getElementById('pendingCount');
 const completedCount = document.getElementById('completedCount');
+const statOverdue = document.getElementById('statOverdue');
 
 const refreshBtn = document.getElementById('refreshBtn');
 
@@ -215,6 +216,7 @@ function taskCardHTML(task) {
 function render(tasks) {
   const filtered = applyFilters(tasks);
 
+  const overdueAll = tasks.filter(isOverdue).length;
   const pending = filtered.filter(t => (t.status || 'Pending') !== 'Completed');
   const completed = filtered.filter(t => (t.status || 'Pending') === 'Completed');
 
@@ -226,6 +228,7 @@ function render(tasks) {
   statTotal.textContent = String(totalAll);
   statDone.textContent = String(doneAll);
   statTodo.textContent = String(todoAll);
+  statOverdue.textContent = String(overdueAll);
 
   // filtered counts shown near headings
   pendingCount.textContent = `${pending.length} task${pending.length === 1 ? '' : 's'}`;
